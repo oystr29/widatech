@@ -13,9 +13,14 @@ import { DatePicker } from '~/components/ui/datepicker'
 import { Input, InputCurrency } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
-import { Plus, Trash2 } from 'lucide-react'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { SelectAsync } from '~/components/select'
 import { loadProductsOptions } from '~/lib/select'
+import { useCreateInvoicesMutation } from '~/api/invoices'
+import { useEffect } from 'react'
+import { toast } from 'sonner'
+import { format } from 'date-fns'
+import { useNavigate } from '~/router'
 
 const formSchema = z.object({
   date: z.date(),
@@ -49,6 +54,7 @@ type FormSchema = z.infer<typeof formSchema>
 const date = new Date()
 
 export default function Page() {
+  const nav = useNavigate()
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     values: {
@@ -65,20 +71,46 @@ export default function Page() {
     name: 'products',
   })
 
+  const [createInvoice, { isSuccess, data, error, isError, isLoading }] =
+    useCreateInvoicesMutation()
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      toast.success(data.message)
+      nav('/')
+      return
+    }
+    if (isError) {
+      console.error(error)
+      toast.error('Error when create invoices')
+    }
+  }, [isSuccess, isError])
+
   return (
     <>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((v) => {
             console.log(v)
+            // createInvoice({ data: 'hehehehe' })
+            createInvoice({
+              data: {
+                ...v,
+                date: format(v.date, 'yyyy-MM-dd'),
+                products: v.products.map((vv) => ({
+                  ...vv,
+                  name: vv.name.label,
+                })),
+              },
+            })
           })}
           className="space-y-4"
         >
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-lg font-medium">Create New Invoices</h1>
+            <h1 className="text-lg font-medium">Add New Invoices</h1>
             <Button type="submit">
-              <Plus />
-              <span>Invoice</span>
+              {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
+              <span>Create Invoice</span>
             </Button>
           </div>
           <FormField
@@ -174,7 +206,7 @@ export default function Page() {
           </div>
           <div className="mt-4">
             {fields.map((d, i) => (
-              <div key={d.id} className="mb-4 border-b pb-4">
+              <div key={d.id} className="mb-4 rounded-lg border p-2 shadow-md">
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
