@@ -3,11 +3,18 @@ import { Hono } from "hono";
 import { products as productsTable } from "~/db/schema.ts";
 import { db } from "~/db/index.ts";
 import { z } from "zod";
+import { like } from "drizzle-orm";
 
 const products = new Hono();
 
 products.get("/", async (c) => {
-  const res = await db.query.products.findMany();
+  const search = c.req.query("search");
+
+  const res = await db.query.products.findMany({
+    where: search
+      ? (products, { like }) => like(products.name, `%${search}%`)
+      : undefined,
+  });
 
   return c.json({ data: res });
 });
@@ -19,8 +26,8 @@ export const productSchema = z.object({
     .default(
       "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png?v=1530129081",
     ),
-  stock: z.number().default(10),
-  price: z.number().default(20000),
+  qty: z.number(),
+  price: z.number(),
 });
 
 products.post("/", zValidator("form", productSchema.array()), async (c) => {
@@ -28,7 +35,7 @@ products.post("/", zValidator("form", productSchema.array()), async (c) => {
 
   await db.insert(productsTable).values(form);
 
-  return c.json({});
+  return c.json({ message: "" });
 });
 
 export { products };

@@ -32,7 +32,7 @@ async function main() {
       stock: 1,
     },
   ]);
-  console.log("Berhasil Seeder");
+  console.log("Done Seeder");
   console.log(res);
 }
 
