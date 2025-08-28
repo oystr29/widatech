@@ -4,32 +4,32 @@ import { products } from "./schema.ts";
 async function main() {
   const res = await db.insert(products).values([
     {
-      name: "Hermes",
-      picture:
-        "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-1_large.png?v=1530129113",
-      price: 30000000,
-      stock: 2,
+      name: "Bluetooth Speaker",
+      picture: "http://localhost:3001/imgs/bluetooth-speaker.jpg",
+      price: 756000,
+      stock: 50,
+      cogs: 630000,
     },
     {
-      name: "New Balance",
-      picture:
-        "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-2_large.png?v=1530129132",
-      price: 50000000,
-      stock: 3,
+      name: "Headphone",
+      picture: "http://localhost:3001/imgs/headphone.webp",
+      price: 480000,
+      cogs: 400000,
+      stock: 50,
     },
     {
-      name: "Montblanc",
-      picture:
-        "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-3_large.png?v=1530129152",
-      price: 10000000,
-      stock: 4,
+      name: "Laptop Charger",
+      picture: "http://localhost:3001/imgs/laptop-charger.jpg",
+      price: 960000,
+      cogs: 800000,
+      stock: 50,
     },
     {
-      name: "New Era",
-      picture:
-        "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-4_large.png?v=1530129177",
-      price: 500000,
-      stock: 1,
+      name: "LCD Monitor",
+      picture: "http://localhost:3001/imgs/lcd-monitor.webp",
+      cogs: 500000,
+      price: 600000,
+      stock: 10,
     },
   ]);
   console.log("Done Seeder");

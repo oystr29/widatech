@@ -2,11 +2,14 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { invoices } from "./routes/invoices.ts";
 import { products } from "./routes/products.ts";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 
 const app = new Hono();
 
-app.use('/*', cors())
+app.use("/*", cors());
+
+app.use("*", serveStatic({ root: "./static" }));
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
