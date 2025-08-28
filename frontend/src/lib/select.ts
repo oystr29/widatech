@@ -34,6 +34,7 @@ const loadProductsOptions: LoadOptions<
   const options = warehouses.data.data.map((d) => ({
     label: `${d.name}`,
     value: JSON.stringify(d),
+    sublabel: 'hehehe',
   }))
 
   return {

@@ -7,16 +7,52 @@ import {
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { productSchema } from "./products.ts";
-import { sql } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 
 const invoices = new Hono();
 
+const defaultPage = 1;
+const defaultPaginate = 10;
 invoices.get("/", async (c) => {
+  const page = !Number.isNaN(c.req.query("page"))
+    ? Number(c.req.query("page") ?? `${defaultPage}`)
+    : defaultPage;
+  const paginate = !Number.isNaN(c.req.query("paginate"))
+    ? Number(c.req.query("paginate") ?? `${defaultPaginate}`)
+    : defaultPaginate;
+
+  const offset = (page - 1) * paginate;
+
+  const [{ count: total_page }] = await db
+    .select({ count: count() })
+    .from(invoicesTable);
+
+  const lastPage = Math.ceil(total_page / paginate);
+
   const data = await db.query.invoices.findMany({
     with: { invoicesToProducts: true },
+    limit: paginate,
+    offset,
   });
 
-  return c.json({ data });
+  return c.json({
+    data,
+    meta: {
+      current_page: page,
+      from: offset + 1,
+      last_page: lastPage,
+      per_page: paginate,
+      to: Math.min(offset + paginate, total_page),
+      total: total_page,
+      links: Array.from({ length: lastPage }, (_, i) => {
+        const pageNum = i + 1;
+        return {
+          label: pageNum,
+          active: pageNum === page,
+        };
+      }),
+    },
+  });
 });
 
 invoices.get("/:id", async (c) => {
@@ -147,12 +183,23 @@ invoices.post(
     const { products, ...invoice } = c.req.valid("json");
 
     try {
-      const dateTime = new Date(invoice.date).getTime();
+      const date = new Date(invoice.date);
+      const dateTime = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getHours(),
+        date.getMinutes(),
+        date.getSeconds(),
+        date.getMilliseconds(),
+      ).getTime();
       const invoice_no = `Invoice#${dateTime}`;
+
       const [invoiceRes] = await db.insert(invoicesTable).values({
         ...invoice,
         invoice_no,
-        payment_type: invoice.payment_type ?? "NotCashOrCredit",
+        payment_type: !!invoice.payment_type
+          ? invoice.payment_type
+          : "NotCashOrCredit",
       });
 
       const productsWithInvoiceId = products.map((product) => ({

@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { axiosBaseQuery } from '~/lib/axios'
 import type { Invoice, InvoiceProduct } from './schema'
+import type { Meta } from '../meta'
 
 type InvoiceForm = Omit<Invoice, 'id' | 'invoice_no'> & {
   payment_type?: string | null
@@ -18,10 +19,17 @@ const invoicesApi = createApi({
   tagTypes: ['Invoices'],
   endpoints(build) {
     return {
-      listInvoices: build.query<{ data: Invoice[] }, undefined>({
-        query: () => {
+      listInvoices: build.query<
+        {
+          data: Invoice[]
+          meta: Meta
+        },
+        { page?: string | number; paginate?: number | string } | undefined
+      >({
+        query: (params) => {
           return {
             url: '/invoices',
+            params,
             method: 'get',
             headers: {
               'Content-Type': 'application/json',
@@ -63,7 +71,9 @@ const invoicesApi = createApi({
         },
       }),
       detailInvoicesProducts: build.query<
-        { data: InvoiceProduct[] },
+        {
+          data: InvoiceProduct[]
+        },
         { id: string }
       >({
         query: ({ id }) => {

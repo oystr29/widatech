@@ -21,6 +21,7 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { useNavigate } from '~/router'
+import { formatNumber } from '~/lib/utils'
 
 const formSchema = z.object({
   date: z.date(),
@@ -271,6 +272,32 @@ export default function Page() {
                             isClearable
                             placeholder="Choose Product"
                             loadOptions={loadProductsOptions}
+                            formatOptionLabel={(v) => {
+                              const { picture, stock, price } = JSON.parse(
+                                `${v.value}`
+                              ) as {
+                                id: number
+                                stock: number
+                                price: number
+                                picture: string
+                              }
+
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <img
+                                    src={picture}
+                                    className="h-8 w-8 rounded-md"
+                                  />
+                                  <div className="">
+                                    <p>{v.label}</p>
+                                    <p className="text-muted-foreground text-xs">
+                                      {formatNumber(price, true)} | Stock{' '}
+                                      {formatNumber(stock)} pcs
+                                    </p>
+                                  </div>
+                                </div>
+                              )
+                            }}
                             value={field.value}
                             onChange={(v) => {
                               field.onChange(v)
