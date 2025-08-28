@@ -22,9 +22,9 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
 } from '~/components/ui/sidebar'
-import { Link, type Path } from '~/router'
+import { Link } from '~/router'
 
-const links: { title: string; href: Path }[] = [
+const links: { title: string; href: '/' | '/invoices/create' }[] = [
   {
     title: 'List Invoices',
     href: '/',
@@ -107,7 +107,7 @@ export default function App() {
           </div>
         </SidebarProvider>
       </div>
-      <Toaster richColors closeButton />
+      <Toaster theme="light" richColors closeButton />
     </>
   )
 }

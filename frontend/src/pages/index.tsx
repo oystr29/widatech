@@ -14,15 +14,15 @@ const columns = [
     header: 'No',
     cell: ({ row }) => row.index + 1,
   }),
-  colHelper.display({
-    header: 'No. Invoice',
-    cell: () => (
+  colHelper.accessor('invoice_no', {
+    header: 'Invoice Number',
+    cell: ({ getValue, row }) => (
       <Link
         className="hover:underline"
-        params={{ id: '1' }}
+        params={{ id: `${row.original.id}` }}
         to={`/invoices/detail/:id`}
       >
-        Invoice#1234
+        {getValue()}
       </Link>
     ),
   }),
@@ -35,6 +35,10 @@ const columns = [
   }),
   colHelper.accessor('sales_person_name', {
     header: 'Sales',
+  }),
+  colHelper.accessor('payment_type', {
+    header: 'Payment Type',
+    cell: ({ getValue }) => <div className="uppercase">{getValue()}</div>,
   }),
   colHelper.accessor('notes', {
     header: 'Notes',

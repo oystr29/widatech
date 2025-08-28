@@ -1,5 +1,7 @@
 type Invoice = {
   date: string
+  invoice_no: string
+  payment_type: string
   id: number
   customer_name: string
   sales_person_name: string
@@ -8,10 +10,10 @@ type Invoice = {
 
 type InvoiceProduct = {
   id: number
-  name: string
-  picture: string
+product_name: string
+  product_picture: string
   qty: number
-  price: number
+  product_price: number
   invoiceId: number
 }
 

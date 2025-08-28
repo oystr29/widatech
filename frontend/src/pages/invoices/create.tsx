@@ -14,7 +14,7 @@ import { Input, InputCurrency } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { SelectAsync } from '~/components/select'
+import { Select, SelectAsync } from '~/components/select'
 import { loadProductsOptions } from '~/lib/select'
 import { useCreateInvoicesMutation } from '~/api/invoices'
 import { useEffect } from 'react'
@@ -27,16 +27,20 @@ const formSchema = z.object({
   customer_name: z.string().min(1, 'Please fill the customer name'),
   sales_person_name: z.string().min(1, 'Please fill the sales person name'),
   notes: z.string().optional(),
+  payment_type: z
+    .object({
+      label: z.string(),
+      value: z.string(),
+    })
+    .nullable(),
   products: z
     .object({
       id: z.string(),
-      name: z.object(
-        {
-          label: z.string(),
-          value: z.string(),
-        },
-        { error: 'Please select product' }
-      ),
+      product_id: z.number(),
+      name: z.object({
+        label: z.string(),
+        value: z.string(),
+      }),
       picture: z.string(),
       price: z.coerce
         .number<number>({ error: 'Please fill the price' })
@@ -51,6 +55,8 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>
 
+const payments_type = ['Cash', 'Credit'].map((v) => ({ label: v, value: v }))
+
 const date = new Date()
 
 export default function Page() {
@@ -63,6 +69,7 @@ export default function Page() {
       products: [],
       sales_person_name: '',
       notes: '',
+      payment_type: null,
     },
   })
 
@@ -96,6 +103,7 @@ export default function Page() {
             createInvoice({
               data: {
                 ...v,
+                payment_type: v.payment_type?.value ?? '',
                 date: format(v.date, 'yyyy-MM-dd'),
                 products: v.products.map((vv) => ({
                   ...vv,
@@ -113,23 +121,44 @@ export default function Page() {
               <span>Create Invoice</span>
             </Button>
           </div>
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    classNameBtn="w-full"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      classNameBtn="w-full"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="payment_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Time</FormLabel>
+                  <FormControl>
+                    <Select
+                      isClearable
+                      options={payments_type}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select payment type"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -184,6 +213,7 @@ export default function Page() {
                       'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png?v=1530129081',
                     price: 0,
                     stock: 1,
+                    product_id: 0,
                   })
                 }}
                 type="button"
@@ -245,14 +275,14 @@ export default function Page() {
                             onChange={(v) => {
                               field.onChange(v)
                               if (v) {
-                                const { picture, stock, price } = JSON.parse(
-                                  `${v.value}`
-                                ) as {
-                                  id: number
-                                  stock: number
-                                  price: number
-                                  picture: string
-                                }
+                                const { id, picture, stock, price } =
+                                  JSON.parse(`${v.value}`) as {
+                                    id: number
+                                    stock: number
+                                    price: number
+                                    picture: string
+                                  }
+                                form.setValue(`products.${i}.product_id`, id)
                                 form.setValue(`products.${i}.price`, price)
                                 form.setValue(`products.${i}.picture`, picture)
                                 form.setValue(`products.${i}.qty`, stock)

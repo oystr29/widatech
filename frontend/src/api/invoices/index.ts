@@ -2,14 +2,8 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { axiosBaseQuery } from '~/lib/axios'
 import type { Invoice, InvoiceProduct } from './schema'
 
-type Product = {
-  name: string
-  picture: string
-  price: number
-  qty: number
-}
-
-type InvoiceForm = Omit<Invoice, 'id'> & {
+type InvoiceForm = Omit<Invoice, 'id' | 'invoice_no'> & {
+  payment_type?: string | null
   products: {
     name: string
     picture: string
@@ -48,7 +42,14 @@ const invoicesApi = createApi({
               [{ type: 'Invoices', id: 'LIST' }],
       }),
       detailInvoices: build.query<
-        { data: Invoice & { products: Product } },
+        {
+          data: Invoice & {
+            invoicesToProducts: (InvoiceProduct & {
+              product: { cogs: number }
+            })[]
+            summary: { total: number }
+          }
+        },
         { id: string }
       >({
         query: ({ id }) => {
