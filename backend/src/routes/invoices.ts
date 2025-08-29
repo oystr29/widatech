@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { db } from "../db/index.ts";
+import { db } from "../db/index.js";
 import {
   invoices as invoicesTable,
   invoicesToProducts as invoicesToProductsTable,
-} from "../db/schema.ts";
+} from "../db/schema.js";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { productSchema } from "./products.ts";
+import { productSchema } from "./products.js";
 import { count, sql } from "drizzle-orm";
 
 const invoices = new Hono();

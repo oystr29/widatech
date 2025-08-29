@@ -1,7 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { products as productsTable } from "../db/schema.ts";
-import { db } from "../db/index.ts";
+import { products as productsTable } from "../db/schema.js";
+import { db } from "../db/index.js";
 import { z } from "zod";
 
 const products = new Hono();

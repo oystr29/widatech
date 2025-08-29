@@ -1,5 +1,5 @@
-import { db } from "./index.ts";
-import { products } from "./schema.ts";
+import { db } from "./index.js";
+import { products } from "./schema.js";
 
 async function main() {
   const res = await db.insert(products).values([
