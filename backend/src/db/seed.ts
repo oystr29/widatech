@@ -1,5 +1,34 @@
+import dayjs from "dayjs";
 import { db } from "./index.js";
-import { products } from "./schema.js";
+import { invoices, invoicesToProducts, products } from "./schema.js";
+import { faker } from "@faker-js/faker";
+
+/* const invoicesSeed = () => {
+  const data: (typeof invoices.$inferSelect)[] = Array.from(
+    { length: 50 },
+    (_, i) => {
+      const products: (typeof invoicesToProducts.$inferInsert)[] = Array.from(
+        {
+          length: faker.number.int({ min: 1, max: 4 }),
+        },
+        () => {
+          return {};
+        },
+      );
+      const date = faker.date.between({
+        from: dayjs().subtract(2, "month").toDate(),
+        to: dayjs().add(1, "week").toDate(),
+      });
+      return {
+        date: date.toISOString(),
+        customer_name: faker.person.firstName,
+        invoice_no: `Invoice#${date.getTime()}`,
+      };
+    },
+  );
+
+  const res = await db.insert(invoices).values();
+}; */
 
 async function main() {
   const res = await db.insert(products).values([

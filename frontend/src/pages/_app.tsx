@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { Header } from '~/components/header'
 import { Toaster } from '~/components/ui/sonner'
 import {
@@ -23,6 +23,7 @@ import {
   SidebarProvider,
 } from '~/components/ui/sidebar'
 import { Link } from '~/router'
+import { cn } from '~/lib/utils'
 
 const links: {
   title: string
@@ -43,6 +44,8 @@ const links: {
 ]
 
 export default function App() {
+  const location = useLocation()
+
   return (
     <>
       <div className="[--header-height:calc(--spacing(14))]">
@@ -90,7 +93,13 @@ export default function App() {
                           <SidebarMenuSub>
                             {links.map((link) => (
                               <SidebarMenuSubItem key={link.title}>
-                                <SidebarMenuSubButton asChild>
+                                <SidebarMenuSubButton
+                                  className={cn(
+                                    location.pathname === link.href &&
+                                      'bg-blue-600 text-white hover:bg-blue-500 hover:text-white'
+                                  )}
+                                  asChild
+                                >
                                   <Link to={link.href}>
                                     <span>{link.title}</span>
                                   </Link>

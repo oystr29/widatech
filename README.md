@@ -25,3 +25,5 @@ method ✅
 + Show a graph to project revenue from invoices for daily, weekly, and monthly ✅
 + It should enable user to pan and zoom to specific period ✅
 + Auto scroll when new data is pushed ✅
+
+Check the `README.md` in `backend` & `frontend` folders.

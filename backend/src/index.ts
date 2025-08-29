@@ -24,6 +24,6 @@ serve(
     port: 3001,
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
+    console.log(`🚀 Server is running on http://localhost:${info.port}`);
   },
 );

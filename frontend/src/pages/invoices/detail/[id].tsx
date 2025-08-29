@@ -60,7 +60,7 @@ export default function Page() {
       <div className="m-2 rounded-lg border p-4">
         <h1 className="mb-5 text-xl font-semibold">Widatech</h1>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4 border-y px-2 py-4">
-          <p className="text-lg font-medium">Invoice#1234</p>
+          <p className="text-lg font-medium">{invoice?.data.invoice_no}</p>
           {invoice?.data.date ? (
             <p className="text-muted-foreground text-lg font-medium">
               Date: {format(invoice?.data.date, 'dd/MM/yy')}
