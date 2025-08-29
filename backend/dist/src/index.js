@@ -6,7 +6,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 const app = new Hono();
 app.use("/*", cors());
-app.use("*", serveStatic({ root: "./static" }));
+app.use("*", serveStatic({ root: "./src/static" }));
 app.get("/", (c) => {
     return c.text("Hello Hono!");
 });
