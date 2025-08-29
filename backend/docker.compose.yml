@@ -1,0 +1,18 @@
+services:
+  widatech_backend:
+    build:
+      context: .
+    platform: "linux/amd64"     # VPS kamu x86_64
+    container_name: widatech_backend
+    env_file: .env
+    volumes:
+      - .env:/root/.env:ro
+    ports:
+      - "3001:3001"
+    networks:
+      - mysql_network
+
+networks:
+  mysql_network:
+    external: true
+  
