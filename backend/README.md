@@ -32,7 +32,6 @@ npm run db:push
 npm run db:seed
 ```
 
-
 6. Run the backend. 
 
 ```bash
