@@ -22,6 +22,6 @@ method ✅
 
 3. Section 3 - Time-series graph
 
-+ Show a graph to project revenue from invoices for daily, weekly, and monthly
-+ It should enable user to pan and zoom to specific period
-+ Auto scroll when new data is pushed
++ Show a graph to project revenue from invoices for daily, weekly, and monthly ✅
++ It should enable user to pan and zoom to specific period ✅
++ Auto scroll when new data is pushed ✅

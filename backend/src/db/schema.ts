@@ -8,6 +8,7 @@ export const invoices = mysqlTable("invoices", {
   customer_name: varchar({ length: 255 }).notNull(),
   sales_person_name: varchar({ length: 255 }).notNull(),
   payment_type: varchar({ length: 255 }).notNull(),
+  order_total: int().notNull(),
   notes: text(""),
 });
 

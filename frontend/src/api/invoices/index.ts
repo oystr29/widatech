@@ -49,6 +49,33 @@ const invoicesApi = createApi({
             : // an error occurred, but we still want to refetch this query when `{ type: 'Posts', id: 'LIST' }` is invalidated
               [{ type: 'Invoices', id: 'LIST' }],
       }),
+      timeseriesInvoices: build.query<
+        { data: { x: number; y: number }[] },
+      {type?: string} | undefined 
+      >({
+        query: (params) => {
+          return {
+            url: `/invoices/timeseries`,
+            params,
+            method: 'get',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        },
+        providesTags: (result) =>
+          // is result available?
+          result
+            ? // successful query
+              [
+                ...result.data.map(
+                  ({ x, y }) => ({ type: 'Invoices', id: x + y }) as const
+                ),
+                { type: 'Invoices', id: 'Timeseries' },
+              ]
+            : // an error occurred, but we still want to refetch this query when `{ type: 'Posts', id: 'LIST' }` is invalidated
+              [{ type: 'Invoices', id: 'Timeseries' }],
+      }),
       detailInvoices: build.query<
         {
           data: Invoice & {
@@ -102,7 +129,10 @@ const invoicesApi = createApi({
             },
           }
         },
-        invalidatesTags: [{ type: 'Invoices', id: 'LIST' }],
+        invalidatesTags: [
+          { type: 'Invoices', id: 'LIST' },
+          { type: 'Invoices', id: 'Timeseries' },
+        ],
       }),
     }
   },
@@ -113,6 +143,7 @@ const {
   useListInvoicesQuery,
   useDetailInvoicesQuery,
   useDetailInvoicesProductsQuery,
+  useTimeseriesInvoicesQuery,
 } = invoicesApi
 
 export {
@@ -121,4 +152,5 @@ export {
   useListInvoicesQuery,
   useDetailInvoicesQuery,
   useDetailInvoicesProductsQuery,
+  useTimeseriesInvoicesQuery,
 }

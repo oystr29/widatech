@@ -1,15 +1,6 @@
 import { useSidebar } from '~/hooks/use-sidebar'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from './ui/breadcrumb'
-import { Input } from './ui/input'
 
 export function Header() {
   const { toggleSidebar } = useSidebar()
@@ -38,20 +29,6 @@ export function Header() {
           </svg>
         </Button>
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb className="hidden sm:block">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                Building Your Application
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <Input className="w-full sm:ml-auto sm:w-auto" />
       </div>
     </header>
   )

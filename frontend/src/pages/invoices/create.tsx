@@ -13,13 +13,12 @@ import { DatePicker } from '~/components/ui/datepicker'
 import { Input, InputCurrency } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Loader2, Plus, Send, Trash2 } from 'lucide-react'
 import { Select, SelectAsync } from '~/components/select'
 import { loadProductsOptions } from '~/lib/select'
 import { useCreateInvoicesMutation } from '~/api/invoices'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
 import { useNavigate } from '~/router'
 import { formatNumber } from '~/lib/utils'
 
@@ -38,10 +37,13 @@ const formSchema = z.object({
     .object({
       id: z.string(),
       product_id: z.number(),
-      name: z.object({
-        label: z.string(),
-        value: z.string(),
-      }),
+      name: z.object(
+        {
+          label: z.string(),
+          value: z.string(),
+        },
+        { error: 'Please choose product' }
+      ),
       picture: z.string(),
       price: z.coerce
         .number<number>({ error: 'Please fill the price' })
@@ -99,13 +101,22 @@ export default function Page() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((v) => {
-            console.log(v)
-            // createInvoice({ data: 'hehehehe' })
+            const now = new Date()
+            const selectedDate = new Date(v.date)
+            const date = new Date(
+              selectedDate.getFullYear(),
+              selectedDate.getMonth(),
+              selectedDate.getDate(),
+              now.getHours(),
+              now.getMinutes(),
+              now.getSeconds(),
+              now.getMilliseconds()
+            ).toISOString()
             createInvoice({
               data: {
                 ...v,
                 payment_type: v.payment_type?.value ?? '',
-                date: format(v.date, 'yyyy-MM-dd'),
+                date,
                 products: v.products.map((vv) => ({
                   ...vv,
                   name: vv.name.label,
@@ -117,10 +128,6 @@ export default function Page() {
         >
           <div className="mb-4 flex items-center justify-between">
             <h1 className="text-lg font-medium">Add New Invoices</h1>
-            <Button type="submit">
-              {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
-              <span>Create Invoice</span>
-            </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
@@ -203,26 +210,6 @@ export default function Page() {
           <div>
             <div className="mb-1 flex items-center gap-x-2">
               <p>Products</p>
-              <Button
-                onClick={() => {
-                  const id = crypto.randomUUID()
-                  append({
-                    id,
-                    // @ts-expect-error its okay
-                    name: null,
-                    picture:
-                      'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png?v=1530129081',
-                    price: 0,
-                    stock: 1,
-                    product_id: 0,
-                  })
-                }}
-                type="button"
-                className="h-6 w-6"
-                size={'icon'}
-              >
-                <Plus />
-              </Button>
               {fields.length > 0 && (
                 <div className="text-muted-foreground text-sm">
                   ({fields.length})
@@ -384,6 +371,34 @@ export default function Page() {
                 </div>
               </div>
             ))}
+            <div className="flex justify-end">
+              <Button
+                onClick={() => {
+                  const id = crypto.randomUUID()
+                  append({
+                    id,
+                    // @ts-expect-error its okay
+                    name: null,
+                    picture:
+                      'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png?v=1530129081',
+                    price: 0,
+                    stock: 1,
+                    product_id: 0,
+                  })
+                }}
+                className="w-full"
+                variant={'secondary'}
+                type="button"
+              >
+                <Plus /> <span>Add Product</span>
+              </Button>
+            </div>
+          </div>
+          <div className="mt-20">
+            <Button type="submit">
+              {isLoading ? <Loader2 className="animate-spin" /> : <Send />}
+              <span>Submit</span>
+            </Button>
           </div>
         </form>
       </Form>

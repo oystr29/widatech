@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../db/index.js";
+import dayjs from "dayjs";
 import {
   invoices as invoicesTable,
   invoicesToProducts as invoicesToProductsTable,
@@ -8,11 +9,13 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { productSchema } from "./products.js";
 import { count, sql } from "drizzle-orm";
+import { datetime } from "drizzle-orm/mysql-core";
 
 const invoices = new Hono();
 
 const defaultPage = 1;
 const defaultPaginate = 10;
+
 invoices.get("/", async (c) => {
   const page = !Number.isNaN(c.req.query("page"))
     ? Number(c.req.query("page") ?? `${defaultPage}`)
@@ -53,6 +56,53 @@ invoices.get("/", async (c) => {
       }),
     },
   });
+});
+
+invoices.get("/timeseries", async (c) => {
+  const type = c.req.query("type");
+
+  const invoices = await db.query.invoices.findMany({
+    orderBy: (invoice, { asc }) => {
+      return [asc(invoice.date)];
+    },
+    where:
+      type === "weekly" || type === "monthly"
+        ? (invoice, { between }) => {
+            const endDate = new Date();
+
+            const startDate =
+              type === "monthly"
+                ? dayjs().subtract(1, "month")
+                : dayjs().subtract(1, "week");
+
+            return between(
+              invoice.date,
+              startDate.toISOString(),
+              endDate.toISOString(),
+            );
+          }
+        : undefined,
+  });
+
+  const dataRecord: Record<string, number> = {};
+
+  invoices.forEach((invoice, i) => {
+    const d = new Date(invoice.date);
+    const date = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+    if (!dataRecord[date]) {
+      dataRecord[date] = 0;
+    }
+    dataRecord[date] += invoice.order_total;
+  });
+
+  const data: { x: number; y: number }[] = [];
+
+  Object.keys(dataRecord).forEach((d) => {
+    data.push({ x: Number(d), y: dataRecord[d] });
+  });
+
+  return c.json({ data });
 });
 
 invoices.get("/:id", async (c) => {
@@ -167,7 +217,7 @@ invoices.post(
   zValidator(
     "json",
     z.object({
-      date: z.iso.date(),
+      date: z.iso.datetime(),
       customer_name: z.string().min(1, "Please Fill the Customer Name"),
       sales_person_name: z.string().min(1, "Please fill the Sales Person Name"),
       notes: z.string().optional(),
@@ -183,20 +233,24 @@ invoices.post(
     const { products, ...invoice } = c.req.valid("json");
 
     try {
+      const t = new Date();
       const date = new Date(invoice.date);
       const dateTime = new Date(
         date.getFullYear(),
         date.getMonth(),
-        date.getHours(),
-        date.getMinutes(),
-        date.getSeconds(),
-        date.getMilliseconds(),
-      ).getTime();
-      const invoice_no = `Invoice#${dateTime}`;
+        date.getDate(),
+        t.getHours(),
+        t.getMinutes(),
+        t.getSeconds(),
+        t.getMilliseconds(),
+      );
+      const invoice_no = `Invoice#${date.getTime()}`;
 
       const [invoiceRes] = await db.insert(invoicesTable).values({
         ...invoice,
         invoice_no,
+        date: invoice.date,
+        order_total: products.reduce((a, b) => a + b.qty * b.price, 0),
         payment_type: !!invoice.payment_type
           ? invoice.payment_type
           : "NotCashOrCredit",

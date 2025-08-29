@@ -24,7 +24,14 @@ import {
 } from '~/components/ui/sidebar'
 import { Link } from '~/router'
 
-const links: { title: string; href: '/' | '/invoices/create' }[] = [
+const links: {
+  title: string
+  href: '/' | '/invoices/create' | '/invoices/timeseries'
+}[] = [
+  {
+    title: 'Timeseries',
+    href: '/invoices/timeseries',
+  },
   {
     title: 'List Invoices',
     href: '/',
@@ -43,7 +50,7 @@ export default function App() {
           <Header />
           <div className="flex flex-1">
             <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
-              <SidebarHeader></SidebarHeader>
+              <SidebarHeader />
               <SidebarContent>
                 <SidebarGroup>
                   <SidebarMenu>

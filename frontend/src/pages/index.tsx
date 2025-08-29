@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { format } from 'date-fns'
-import { Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { useListInvoicesQuery } from '~/api/invoices'
@@ -63,7 +63,7 @@ const columns = [
 export default function Page() {
   const [searchParams] = useSearchParams()
   const params = Object.fromEntries(searchParams.entries())
-  const { data, isLoading } = useListInvoicesQuery(params)
+  const { data, isLoading, isFetching } = useListInvoicesQuery(params)
 
   useEffect(() => {
     console.log(searchParams)
@@ -72,7 +72,12 @@ export default function Page() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Invoices</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold">Invoices</h1>
+          {(isLoading || isFetching) && (
+            <Loader2 size={16} className="text-muted-foreground animate-spin" />
+          )}
+        </div>
         <Button asChild>
           <Link to={'/invoices/create'}>
             <Plus />
