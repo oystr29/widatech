@@ -18,9 +18,25 @@ cp .env.example .env
 DATABASE_URL=mysql://<user>:<password>@<host>:<port>/<database>
 # DATABASE_URL=mysql://username:password@localhost:3306/dbName
 ```
+Don't forget to create the database 
 
-4. Run the backend. 
+4. Push drizzle schema to DB
+
+```bash
+npm run db:push
+```
+
+5. Seeding products data
+
+```
+npm run db:seed
+```
+
+
+6. Run the backend. 
 
 ```bash
 npm run dev
 ```
+
+It should be run on `http://localhost:3001`
