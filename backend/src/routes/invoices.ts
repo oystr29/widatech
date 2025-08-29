@@ -61,48 +61,52 @@ invoices.get("/", async (c) => {
 invoices.get("/timeseries", async (c) => {
   const type = c.req.query("type");
 
-  const invoices = await db.query.invoices.findMany({
-    orderBy: (invoice, { asc }) => {
-      return [asc(invoice.date)];
-    },
-    where:
-      type === "weekly" || type === "monthly"
-        ? (invoice, { between }) => {
-            const endDate = new Date();
+  if (type === "weekly") {
+    const weekly = await db
+      .select({
+        x: sql<string>`
+    CONCAT(
+      DATE_FORMAT(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d') - INTERVAL (WEEKDAY(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))) DAY, '%a, %d %b %y'),
+      ' - ',
+      DATE_FORMAT(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d') + INTERVAL (6 - WEEKDAY(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))) DAY, '%a, %d %b %y'))`,
+        y: sql<number>`SUM(${invoicesTable.order_total})`,
+      })
+      .from(invoicesTable)
+      .groupBy(sql`YEARWEEK(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'), 3)`)
+      .orderBy(
+        sql`YEARWEEK(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'), 3)`,
+      );
 
-            const startDate =
-              type === "monthly"
-                ? dayjs().subtract(1, "month")
-                : dayjs().subtract(1, "week");
+    return c.json({ data: weekly });
+  }
 
-            return between(
-              invoice.date,
-              startDate.toISOString(),
-              endDate.toISOString(),
-            );
-          }
-        : undefined,
-  });
+  if (type === "monthly") {
+    const monthly = await db
+      .select({
+        x: sql<string>`DATE_FORMAT(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'), '%b %Y')`,
+        y: sql<number>`SUM(${invoicesTable.order_total})`,
+      })
+      .from(invoicesTable)
+      .groupBy(
+        sql`YEAR(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d')), MONTH(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))`,
+      )
+      .orderBy(
+        sql`YEAR(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d')), MONTH(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))`,
+      );
 
-  const dataRecord: Record<string, number> = {};
+    return c.json({ data: monthly });
+  }
 
-  invoices.forEach((invoice, i) => {
-    const d = new Date(invoice.date);
-    const date = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daily = await db
+    .select({
+      x: sql<string>`DATE_FORMAT(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'), '%a, %d %b %y')`,
+      y: sql<number>`SUM(${invoicesTable.order_total})`,
+    })
+    .from(invoicesTable)
+    .groupBy(sql`DATE(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))`)
+    .orderBy(sql`DATE(STR_TO_DATE(${invoicesTable.date}, '%Y-%m-%d'))`);
 
-    if (!dataRecord[date]) {
-      dataRecord[date] = 0;
-    }
-    dataRecord[date] += invoice.order_total;
-  });
-
-  const data: { x: number; y: number }[] = [];
-
-  Object.keys(dataRecord).forEach((d) => {
-    data.push({ x: Number(d), y: dataRecord[d] });
-  });
-
-  return c.json({ data });
+  return c.json({ data: daily });
 });
 
 invoices.get("/:id", async (c) => {

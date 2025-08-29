@@ -57,9 +57,6 @@ export default function Page() {
     },
     grid: { borderColor: '#e5e7eb' },
     xaxis: {
-      type: 'datetime',
-      labels: { datetimeUTC: true },
-      tooltip: { enabled: false },
     },
     yaxis: {
       decimalsInFloat: 2,

@@ -150,7 +150,10 @@ const PaginationParams = ({ meta }: { meta?: Meta }) => {
                   ? Number(searchParams.get('page'))
                   : 1
                 if (page <= 1) return
-                setSeachParams((o) => ({ ...o, page: `${page - 1}` }))
+                setSeachParams((o) => {
+                  const p = Object.fromEntries(o.entries())
+                  return { ...p, page: `${page - 1}` }
+                })
                 // router.push(`${pathname}?${params.toString()}`)
               }}
             />
@@ -163,7 +166,10 @@ const PaginationParams = ({ meta }: { meta?: Meta }) => {
                   isActive={link.active}
                   onClick={() => {
                     if (link.active) return
-                    setSeachParams((o) => ({ ...o, page: `${link.label}` }))
+                    setSeachParams((o) => {
+                      const p = Object.fromEntries(o.entries())
+                      return { ...p, page: `${link.label}` }
+                    })
                   }}
                 >
                   {link.label}
@@ -180,7 +186,10 @@ const PaginationParams = ({ meta }: { meta?: Meta }) => {
                   ? Number(searchParams.get('page'))
                   : 1
                 if (page === meta.last_page) return
-                setSeachParams((o) => ({ ...o, page: `${page + 1}` }))
+                setSeachParams((o) => {
+                  const p = Object.fromEntries(o.entries())
+                  return { ...p, page: `${page + 1}` }
+                })
               }}
             />
           </PaginationItem>
